@@ -4,15 +4,20 @@
 #
 ################################################################################
 
-KEEPALIVED_VERSION = 1.3.2
+KEEPALIVED_VERSION = 1.4.2
 KEEPALIVED_SITE = http://www.keepalived.org/software
 KEEPALIVED_DEPENDENCIES = host-pkgconf openssl popt
-KEEPALIVED_LICENSE = GPLv2+
+KEEPALIVED_LICENSE = GPL-2.0+
 KEEPALIVED_LICENSE_FILES = COPYING
+# 0001-configure.ac-do-not-force-PIE.patch
+KEEPALIVED_AUTORECONF = YES
 KEEPALIVED_CONF_OPTS += --disable-dbus
 
-ifeq ($(BR2_PACKAGE_LIBNL),y)
-KEEPALIVED_DEPENDENCIES += libnfnetlink
+ifeq ($(BR2_PACKAGE_LIBNL)$(BR2_PACKAGE_LIBNFNETLINK),yy)
+KEEPALIVED_DEPENDENCIES += libnl libnfnetlink
+KEEPALIVED_CONF_OPTS += --enable-libnl
+else
+KEEPALIVED_CONF_OPTS += --disable-libnl
 endif
 
 ifeq ($(BR2_PACKAGE_IPSET),y)

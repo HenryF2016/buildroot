@@ -7,18 +7,11 @@ config BR2_PACKAGE_LINUX_TOOLS
 
 config BR2_PACKAGE_LINUX_TOOLS_CPUPOWER
 	bool "cpupower"
-	depends on !BR2_bfin # pciutils
-	depends on BR2_USE_WCHAR || !BR2_NEEDS_GETTEXT # gettext
 	select BR2_PACKAGE_LINUX_TOOLS
 	select BR2_PACKAGE_PCIUTILS
-	select BR2_PACKAGE_GETTEXT if BR2_NEEDS_GETTEXT
 	help
 	  cpupower is a collection of tools to examine and tune power
 	  saving related features of your processor.
-
-comment "cpupower needs a toolchain w/ wchar"
-	depends on !BR2_bfin
-	depends on !BR2_USE_WCHAR && BR2_NEEDS_GETTEXT
 
 config BR2_PACKAGE_LINUX_TOOLS_GPIO
 	bool "gpio"
@@ -60,6 +53,19 @@ config BR2_PACKAGE_LINUX_TOOLS_PERF
 
 	  https://perf.wiki.kernel.org/
 
+if BR2_PACKAGE_LINUX_TOOLS_PERF
+
+config BR2_PACKAGE_LINUX_TOOLS_PERF_TUI
+	bool "enable perf TUI"
+	depends on BR2_USE_MMU # slang
+	select BR2_PACKAGE_SLANG
+	help
+	  Enable the TUI interface for perf which requires a TTY and
+	  enables zooming into DSOs and threads as well as other
+	  features.
+
+endif
+
 config BR2_PACKAGE_LINUX_TOOLS_SELFTESTS
 	bool"selftests"
 	depends on BR2_PACKAGE_BUSYBOX_SHOW_OTHERS # bash
@@ -82,5 +88,13 @@ config BR2_PACKAGE_LINUX_TOOLS_SELFTESTS
 comment "selftests needs BR2_PACKAGE_BUSYBOX_SHOW_OTHERS"
 	depends on BR2_USE_MMU
 	depends on !BR2_PACKAGE_BUSYBOX_SHOW_OTHERS
+
+config BR2_PACKAGE_LINUX_TOOLS_TMON
+	bool "tmon"
+	select BR2_PACKAGE_LINUX_TOOLS
+	select BR2_PACKAGE_NCURSES
+	help
+	  tmon is a terminal-based tool (using curses) that allows the
+	  user to access thermal information about the system.
 
 endmenu

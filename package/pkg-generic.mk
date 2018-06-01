@@ -63,6 +63,8 @@ GLOBAL_INSTRUMENTATION_HOOKS += step_time
 # $(2): base directory to search in
 # $(3): suffix of file  (optional)
 define step_pkg_size_inner
+	@touch $(BUILD_DIR)/packages-file-list$(3).txt
+	$(SED) '/^$(1),/d' $(BUILD_DIR)/packages-file-list$(3).txt
 	cd $(2); \
 	find . \( -type f -o -type l \) \
 		-newer $($(PKG)_DIR)/.stamp_built \
@@ -481,8 +483,13 @@ ifndef $(2)_PATCH
  endif
 endif
 
+ifneq ($$(filter bzr cvs hg svn,$$($(2)_SITE_METHOD)),)
+BR_NO_CHECK_HASH_FOR += $$($(2)_SOURCE)
+endif
+
 $(2)_ALL_DOWNLOADS = \
-	$$(foreach p,$$($(2)_SOURCE) $$($(2)_PATCH) $$($(2)_EXTRA_DOWNLOADS),\
+	$$(if $$($(2)_SOURCE),$$($(2)_SITE_METHOD)+$$($(2)_SITE)/$$($(2)_SOURCE)) \
+	$$(foreach p,$$($(2)_PATCH) $$($(2)_EXTRA_DOWNLOADS),\
 		$$(if $$(findstring ://,$$(p)),$$(p),\
 			$$($(2)_SITE)/$$(p)))
 
@@ -512,6 +519,9 @@ endif
 ifeq ($$($(2)_SITE_METHOD),local)
 ifeq ($$($(2)_OVERRIDE_SRCDIR),)
 $(2)_OVERRIDE_SRCDIR = $$($(2)_SITE)
+endif
+ifeq ($$($(2)_OVERRIDE_SRCDIR),)
+$$(error $(1) has local site method, but `$(2)_SITE` is not defined)
 endif
 endif
 
@@ -645,6 +655,12 @@ $(2)_PRE_LEGAL_INFO_HOOKS       ?=
 $(2)_POST_LEGAL_INFO_HOOKS      ?=
 $(2)_TARGET_FINALIZE_HOOKS      ?=
 $(2)_ROOTFS_PRE_CMD_HOOKS       ?=
+
+ifeq ($$($(2)_TYPE),target)
+ifneq ($$(HOST_$(2)_KCONFIG_VAR),)
+$$(error "Package $(1) defines host variant before target variant!")
+endif
+endif
 
 # human-friendly targets and target sequencing
 $(1):			$(1)-install

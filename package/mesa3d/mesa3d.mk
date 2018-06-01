@@ -5,7 +5,7 @@
 ################################################################################
 
 # When updating the version, please also update mesa3d-headers
-MESA3D_VERSION = 18.0.1
+MESA3D_VERSION = 18.0.3
 MESA3D_SOURCE = mesa-$(MESA3D_VERSION).tar.xz
 MESA3D_SITE = https://mesa.freedesktop.org/archive
 MESA3D_LICENSE = MIT, SGI, Khronos
@@ -41,6 +41,10 @@ MESA3D_CONF_OPTS += \
 else
 # Avoid automatic search of llvm-config
 MESA3D_CONF_OPTS += --disable-llvm
+endif
+
+ifeq ($(BR2_PACKAGE_MESA3D_NEEDS_ELFUTILS),y)
+MESA3D_DEPENDENCIES += elfutils
 endif
 
 # The Sourcery MIPS toolchain has a special (non-upstream) feature to
@@ -166,6 +170,8 @@ MESA3D_PLATFORMS = drm
 else ifeq ($(BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_ETNAVIV),y)
 MESA3D_PLATFORMS = drm
 else ifeq ($(BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_VIRGL),y)
+MESA3D_PLATFORMS = drm
+else ifeq ($(BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_RADEONSI),y)
 MESA3D_PLATFORMS = drm
 endif
 ifeq ($(BR2_PACKAGE_WAYLAND),y)

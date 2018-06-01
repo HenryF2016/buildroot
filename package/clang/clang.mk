@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-CLANG_VERSION = 5.0.1
+CLANG_VERSION = 5.0.2
 CLANG_SITE = http://llvm.org/releases/$(CLANG_VERSION)
 CLANG_SOURCE = cfe-$(CLANG_VERSION).src.tar.xz
 CLANG_LICENSE = NCSA
@@ -56,11 +56,26 @@ CLANG_CONF_OPTS += -DLLVM_CONFIG:FILEPATH=$(STAGING_DIR)/usr/bin/llvm-config \
 
 # Clang can't be used as compiler on the target since there are no
 # development files (headers) and other build tools. So remove clang
-# binaries from target.
-define CLANG_DELETE_BINARIES_FROM_TARGET
-	rm -f $(TARGET_DIR)/usr/bin/clang*
+# binaries and some other unnecessary files from target.
+CLANG_FILES_TO_REMOVE = \
+	/usr/bin/clang* \
+	/usr/bin/c-index-test \
+	/usr/bin/git-clang-format \
+	/usr/bin/scan-build \
+	/usr/bin/scan-view \
+	/usr/libexec/c++-analyzer \
+	/usr/libexec/ccc-analyzer \
+	/usr/share/clang \
+	/usr/share/opt-viewer \
+	/usr/share/scan-build \
+	/usr/share/scan-view \
+	/usr/share/man/man1/scan-build.1 \
+	/usr/lib/clang
+
+define CLANG_CLEANUP_TARGET
+	rm -rf $(addprefix $(TARGET_DIR),$(CLANG_FILES_TO_REMOVE))
 endef
-CLANG_POST_INSTALL_TARGET_HOOKS += CLANG_DELETE_BINARIES_FROM_TARGET
+CLANG_POST_INSTALL_TARGET_HOOKS += CLANG_CLEANUP_TARGET
 
 # clang-tblgen is not installed by default, however it is necessary
 # for cross-compiling clang
@@ -69,6 +84,10 @@ define HOST_CLANG_INSTALL_CLANG_TBLGEN
 		$(HOST_DIR)/usr/bin/clang-tblgen
 endef
 HOST_CLANG_POST_INSTALL_HOOKS = HOST_CLANG_INSTALL_CLANG_TBLGEN
+
+# This option must be enabled to link libclang dynamically against libLLVM.so
+HOST_CLANG_CONF_OPTS += -DLLVM_LINK_LLVM_DYLIB=ON
+CLANG_CONF_OPTS += -DLLVM_LINK_LLVM_DYLIB=ON
 
 $(eval $(cmake-package))
 $(eval $(host-cmake-package))

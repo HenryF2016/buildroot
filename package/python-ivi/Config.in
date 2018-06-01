@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_IVI
+  bool "python-ivi"
+  help
+    The IVI module provides access IVI instruments from Python. 
+    
+    https://github.com/python-ivi/python-ivi

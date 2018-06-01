@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_PERIPHERY
+  bool "python-periphery"
+  help
+    The PYTHON-PERIPHERY module provides sysfs IO access from Python. 
+   
+    https://github.com/vsergeev/python-periphery

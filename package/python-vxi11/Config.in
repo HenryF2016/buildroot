@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_VXI11
+  bool "python-vxi11"
+  help
+    The VXI11 module provides access VXI11 instruments from Python. 
+    
+    https://github.com/python-ivi/python-vxi11
